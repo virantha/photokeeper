@@ -9,19 +9,23 @@ Photo Keeper API Reference (version |release|)
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
-   readme
-   contributing
-   authors
-   history
-   todo
+   photokeeper
 
+Recent Changes
+==============
+.. include:: ../CHANGES_RECENT.rst
 
 Testing
 ================
     `Coverage <http://virantha.github.io/photokeeper/html/testing/index.html>`_
 
+Changelog
+=========
+.. include:: ../CHANGES.rst
+
+.. include:: ../TODO.rst
 
 Indices and tables
 ==================
