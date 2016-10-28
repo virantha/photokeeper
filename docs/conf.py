@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Photo Keeper'
-copyright = u'2014, Virantha N. Ekanayake'
+copyright = u'2016, Virantha N. Ekanayake'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
