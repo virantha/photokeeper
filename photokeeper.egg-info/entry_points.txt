@@ -1,0 +1,3 @@
+[console_scripts]
+photokeeper = photokeeper.photokeeper:main
+
