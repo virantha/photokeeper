@@ -15,13 +15,17 @@
 """
 
 Usage:
-    photokeeper.py [options] PARAMFILE all
-    photokeeper.py [options] PARAMFILE (%s)...
+    photokeeper.py [options] SOURCE_DIR examine
+    photokeeper.py [options] SOURCE_DIR TARGET_DIR [dedupe] file
+    photokeeper.py [options] SOURCE_DIR [dedupe] flickr
+    photokeeper.py [options] SOURCE_DIR TARGET_DIR [dedupe] file flickr
+    photokeeper.py [options] SOURCE_DIR TARGET_DIR all
     photokeeper.py --conf=FILE
     photokeeper.py -h
 
 Arguments:
-    PARAMFILE   YAML file with inputs
+    SOURCE_DIR  Source directory of photos
+    TARGET_DIR  Where to copy the image files
     all         Run all steps in the flow (%s)
 %s
 
@@ -29,29 +33,60 @@ Options:
     -h --help        show this message
     -v --verbose     show more information
     -d --debug       show even more information
-    --rundir=PATH    set path for running simulations in [default: runs] 
     --conf=FILE      load options from file
 
 """
 
 from docopt import docopt
 import yaml
-import sys, os, logging, shutil
-from collections import OrderedDict
+import sys, os, logging, shutil, datetime, pprint, filecmp
+from collections import OrderedDict, defaultdict
 from schema import Schema, And, Optional, Or, Use, SchemaError
+import piexif, dateparser
 
-
+from tqdm import tqdm
+from flickr import Flickr
+from filecopy import FileCopy
 
 from version import __version__
 from utils import ordered_load, merge_args
-
-
 
 """
    
 .. automodule:: photokeeper
     :private-members:
 """
+class ImageFile(object):
+    def __init__(self, srcdir, filename, tgtbasedir, tgtdatedir, datetime_taken, is_video=False):
+        self.srcdir = srcdir
+        self.filename = filename
+        self.tgtbasedir = tgtbasedir
+        self.tgtdatedir = tgtdatedir
+        self.datetime_taken = datetime_taken
+        self.dup = False
+        self.flickr_dup = False
+        self.is_video = is_video
+        #print("adding {} with datetime {}".format(filename, datetime_taken.strftime('%Y-%m-%d %H:%M:%S')))
+        pass
+
+    @property
+    def srcpath(self):
+        return os.path.join(self.srcdir, self.filename)
+    
+    @property
+    def tgtpath(self):
+        return os.path.join(self.tgtbasedir, self.tgtdatedir, self.filename)
+
+    def is_duplicate(self, shallow_compare = True):
+        # First, see if there is a file already there
+        if not os.path.exists(self.tgtpath):
+            return False
+        elif os.path.getsize(self.srcpath) != os.path.getsize(self.tgtpath):
+            return False
+        #elif not filecmp.cmp(self.srcpath, self.tgtpath, shallow_compare):  # This is too slow over a network share
+        #   return False
+        return True
+
 
 class PhotoKeeper(object):
     """
@@ -63,10 +98,12 @@ class PhotoKeeper(object):
         """ 
         """
         self.args = None
-        self.flow = OrderedDict([ ('download', 'Download all transactions from accounts'),
-                                  ('qif',      'Save downloaded transactions to qif'),
-                                  ('ofx',      'Save downloaded transactions to ofx'),
+        self.flow = OrderedDict([ ('examine', 'Examine EXIF tags'),
+                                  ('dedupe', 'Only select files not already present in target directory'),
+                                  ('flickr', 'Upload to flickr'),
+                                  ('file',    'Copy files'),
                       ])
+        self.images = []
 
 
 
@@ -84,7 +121,7 @@ class PhotoKeeper(object):
 
         """
         padding = max([len(x) for x in self.flow.keys()]) # Find max length of flow step names for padding with white space
-        docstring = __doc__ % ('|'.join(self.flow), 
+        docstring = __doc__ % (#'|'.join(self.flow), 
                               ','.join(self.flow.keys()),
                               '\n'.join(['    '+k+' '*(padding+4-len(k))+v for k,v  in self.flow.items()]))
         args = docopt(docstring, version=__version__)
@@ -96,9 +133,10 @@ class PhotoKeeper(object):
         else:
             conf_args = {}
         args = merge_args(conf_args, args)
-
+        print (args)
         schema = Schema({
-            'PARAMFILE': Use(open, error='PARAMFILE should be readable'),
+            'SOURCE_DIR': Or(os.path.isdir, error='Source directory does not exist'),
+            'TARGET_DIR': Or(lambda x: x is None, os.path.isdir, error='Destination directory does not exist'),
             object: object
             })
         try:
@@ -106,13 +144,16 @@ class PhotoKeeper(object):
         except SchemaError as e:
             exit(e)
 
+        print (args)
         if args['all'] == 0:
             for f in list(self.flow):
                 if args[f] == 0: del self.flow[f]
             logging.info("Doing flow steps: %s" % (','.join(self.flow.keys())))
 
-        self.parameters = ordered_load(args['PARAMFILE'])
-        self.run_dir = args['--rundir']
+        self.src_dir = args['SOURCE_DIR']
+        self.tgt_dir = args['TARGET_DIR']
+        if self.tgt_dir:
+            assert os.path.abspath(self.src_dir) != os.path.abspath(self.tgt_dir), 'Target and source directories cannot be the same'
 
         if args['--debug']:
             logging.basicConfig(level=logging.DEBUG, format='%(message)s')
@@ -122,6 +163,72 @@ class PhotoKeeper(object):
         self.args = args # Just save this for posterity
 
 
+    def get_file_count(self, _dir):
+        cnt = 0
+        for root, dirs, files in os.walk(_dir):
+            cnt += len(files)
+        return cnt
+
+
+    def examine_files(self, img_dir):
+        counts = defaultdict(int)
+        dt_format = '%Y-%m-%d'
+        pp = pprint.PrettyPrinter(indent=4)
+        raw_count = self.get_file_count(img_dir)
+        print("Examining {} files in {}".format(raw_count, img_dir))
+        with tqdm(total=raw_count, ncols=80, unit='file') as progress:
+            for root, dirs, files in os.walk(img_dir):
+                for fn in files:
+                    if fn.startswith('.'): continue
+                    filename = os.path.join(root, fn)
+                    progress.update(1)
+                    try:
+                        is_video = False
+                        tags_dict = piexif.load(filename)
+                        image_date = tags_dict['0th'][piexif.ImageIFD.DateTime]
+                        # Why am I even using dateparser if it can't parse this??
+                        image_datetime = dateparser.parse(image_date.decode('utf8'), date_formats=['%Y:%m:%d %H:%M:%S']) 
+                    except ValueError as e:
+
+                        logging.info('IGNORED: %s is not a JPG or TIFF' % (filename))
+                        file_mod_time = os.path.getmtime(filename)
+                        image_datetime = datetime.datetime.fromtimestamp(file_mod_time)
+                        logging.info('Using %s ' % (image_datetime))
+                        is_video = True  # Need to mark this since we don't have EXIF and Flickr doesn't honor file date for date-taken
+                    
+                    image_datetime_text = image_datetime.strftime(dt_format)
+                    counts[image_datetime_text] += 1
+                    self.images.append(ImageFile(os.path.dirname(filename), os.path.basename(filename), self.tgt_dir, image_datetime_text, image_datetime, is_video))
+
+        counts = dict(counts)
+        total = sum(counts.values())
+        print('Found images from {} days'.format(len(counts)))
+        pp.pprint (counts)
+        
+        print('Total images: {}'.format(total))
+
+
+    def _get_unique_filename_suffix(self, filename):
+        dirname = os.path.dirname(filename)
+        fn_with_ext = os.path.basename(filename)
+        fn, ext = os.path.splitext(fn_with_ext)
+        
+        suffix = 1
+        if not os.path.exists(filename):  # Unique, no target filename conflict
+            return filename
+        else:
+            while os.path.exists(os.path.join(dirname, fn+'_'+str(suffix)+ext)):
+                suffix += 1
+            return (os.path.join(dirname, fn+'_'+str(suffix)+ext))
+            
+
+
+    def all_images(self):
+        n = len(self.images)
+        with tqdm(total=n, ncols=80, unit='file') as progress:
+            for i, img in enumerate(self.images):
+                yield img
+                progress.update(1)
 
     def go(self, argv):
         """ 
@@ -132,7 +239,13 @@ class PhotoKeeper(object):
         """
         # Read the command line options
         self.get_options(argv)
-
+        self.examine_files(self.src_dir)
+        for photo_target, TargetClass in [('file', FileCopy), ('flickr', Flickr)]:
+            if photo_target in self.flow:
+                f = TargetClass()
+                if 'dedupe' in self.flow:
+                    f.check_duplicates(self.all_images())
+                f.execute_copy(self.all_images())
 
 def main():
     script = PhotoKeeper()
