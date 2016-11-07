@@ -1,5 +1,5 @@
 Todo list
 =========
 
-- Do more
-- Add more docstrings
+- Add user-configurable date format for filing photos
+- Add other photo services
