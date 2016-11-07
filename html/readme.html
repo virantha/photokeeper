@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Photo Keeper - &#8212; Photo Keeper 0.1.0 documentation</title>
+    <title>Photo Keeper - &#8212; Photo Keeper 0.1.2 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0',
+        VERSION:     '0.1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Photo Keeper 0.1.0 documentation" href="index.html" />
+    <link rel="top" title="Photo Keeper 0.1.2 documentation" href="index.html" />
     <link rel="next" title="Contributing" href="contributing.html" />
-    <link rel="prev" title="Photo Keeper Documentation (version 0.1.0)" href="index.html" /> 
+    <link rel="prev" title="Photo Keeper Documentation (version 0.1.2)" href="index.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -40,9 +40,9 @@
           <a href="contributing.html" title="Contributing"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Photo Keeper Documentation (version 0.1.0)"
+          <a href="index.html" title="Photo Keeper Documentation (version 0.1.2)"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Photo Keeper 0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Photo Keeper 0.1.2 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -51,7 +51,13 @@
   <ul>
 <li><a class="reference internal" href="#">Photo Keeper -</a><ul>
 <li><a class="reference internal" href="#features">Features</a></li>
-<li><a class="reference internal" href="#usage">Usage:</a></li>
+<li><a class="reference internal" href="#usage">Usage:</a><ul>
+<li><a class="reference internal" href="#examine-files">Examine files</a></li>
+<li><a class="reference internal" href="#copy-files-to-a-directory">Copy files to a directory</a></li>
+<li><a class="reference internal" href="#upload-files-to-flickr">Upload files to Flickr</a></li>
+<li><a class="reference internal" href="#full-help">Full help</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
 </ul>
@@ -60,7 +66,7 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Photo Keeper Documentation (version 0.1.0)</a></p>
+                        title="previous chapter">Photo Keeper Documentation (version 0.1.2)</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="contributing.html"
                         title="next chapter">Contributing</a></p>
@@ -91,7 +97,15 @@
             
   <div class="section" id="photo-keeper">
 <h1>Photo Keeper -<a class="headerlink" href="#photo-keeper" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="https://pypi.python.org/pypi/photokeeper"><img alt="image_pypi" src="https://badge.fury.io/py/photokeeper.png" /></a> <a class="reference external" href="https://crate.io/packages/photokeeper?version=latest"><img alt="image_downloads" src="https://pypip.in/d/photokeeper/badge.png" /></a> <img alt="image_license" src="https://pypip.in/license/photokeeper/badge.png" /> <img alt="passing" src="https://scrutinizer-ci.com/g/virantha/photokeeper/badges/build.png?b=master" /> <img alt="quality" src="https://scrutinizer-ci.com/g/virantha/photokeeper/badges/quality-score.png?b=master" /> <a class="reference external" href="https://coveralls.io/r/virantha/photokeeper"><img alt="Coverage Status" src="https://coveralls.io/repos/virantha/photokeeper/badge.png?branch=develop" /></a></p>
+<p><a class="reference external" href="https://pypi.python.org/pypi/photokeeper"><img alt="image_pypi" src="https://badge.fury.io/py/photokeeper.png" /></a> <img alt="passing" src="https://scrutinizer-ci.com/g/virantha/photokeeper/badges/build.png?b=master" /> <img alt="quality" src="https://scrutinizer-ci.com/g/virantha/photokeeper/badges/quality-score.png?b=master" /></p>
+<p>Photo Keeper is a small script that I wrote to address the demise of my Eye-Fi Wifi SD card.
+This script will take a source directory (say the contents of a flash card from a camera),
+scan all the image/video file EXIFs, and sort them into date-based folders in a user-specified
+directory.  It will optionally only copy files that have not already been copied (deduplication per
+folder).  Photo Keeper can also upload all the files to Flickr into the same date-based album
+structure, also taking care not to duplicate files.</p>
+<p>At some point, I intend to integrate this with the FlashAir series of cards for auto-uploads directly
+from the camera, but that is still a work in progress.</p>
 <ul class="simple">
 <li>Free and open-source software: ASL2 license</li>
 <li>Blog: <a class="reference external" href="http://virantha.com/category/projects/photokeeper">http://virantha.com/category/projects/photokeeper</a></li>
@@ -101,16 +115,95 @@
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Kitchen</li>
-<li>Sink</li>
+<li>Sort image files (JPEG/TIFF) and video files into date-based folders (currently only YYYY-MM-DD format supported)</li>
+<li>Upload images and videos to Flickr into date-based albums</li>
+<li>Avoid duplication of files based on photo taken time, size, and filename</li>
 </ul>
 </div>
 <div class="section" id="usage">
 <h2>Usage:<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>See docs</p>
+<div class="section" id="examine-files">
+<h3>Examine files<a class="headerlink" href="#examine-files" title="Permalink to this headline">¶</a></h3>
+<p>Examine the files in a given source directory (no changes or copying):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">photokeeper</span> <span class="n">SRC_DIR</span> <span class="n">examine</span>
+</pre></div>
+</div>
+<p>Results in:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>Examining 482 files in /source
+100%|██████████████████████████████████████▉| 481/482 [00:08&lt;00:00, 59.88file/s]
+Found images from 14 days
+{   &#39;2016-06-24&#39;: 5,
+        &#39;2016-07-02&#39;: 30,
+        &#39;2016-07-03&#39;: 12,
+        &#39;2016-07-04&#39;: 32,
+        &#39;2016-07-05&#39;: 3,
+        &#39;2016-07-21&#39;: 1,
+        &#39;2016-08-02&#39;: 20,
+        &#39;2016-08-05&#39;: 51,
+        &#39;2016-09-30&#39;: 13,
+        &#39;2016-10-09&#39;: 131,
+        &#39;2016-10-10&#39;: 46,
+        &#39;2016-10-29&#39;: 91,
+        &#39;2016-10-31&#39;: 45,
+        &#39;2016-11-06&#39;: 1}
+Total images: 481
+</pre></div>
+</div>
+</div>
+<div class="section" id="copy-files-to-a-directory">
+<h3>Copy files to a directory<a class="headerlink" href="#copy-files-to-a-directory" title="Permalink to this headline">¶</a></h3>
+<p>Copy the files in a given source directory to a target directory with no duplication:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">photokeeper</span> <span class="n">SRC_DIR</span> <span class="n">TGT_DIR</span> <span class="n">dedupe</span> <span class="n">file</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="upload-files-to-flickr">
+<h3>Upload files to Flickr<a class="headerlink" href="#upload-files-to-flickr" title="Permalink to this headline">¶</a></h3>
+<p>First, go to Flickr and get a private key at <a class="reference external" href="http://www.flickr.com/services/api/misc.api_keys.html">http://www.flickr.com/services/api/misc.api_keys.html</a></p>
+<p>Then, create a directory from where you will start photokeeper, and create a file called flickr_api.yaml:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">key</span><span class="p p-Indicator">:</span> <span class="s">&quot;YOUR_API_KEY&quot;</span>
+<span class="l l-Scalar l-Scalar-Plain">secret</span><span class="p p-Indicator">:</span> <span class="s">&quot;YOUR_API_SECRET&quot;</span>
+</pre></div>
+</div>
+<p>Now, use the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">photokeeper</span> <span class="n">SRC_DIR</span> <span class="n">TGT_DIR</span> <span class="n">dedupe</span> <span class="n">flickr</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="full-help">
+<h3>Full help<a class="headerlink" href="#full-help" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">SOURCE_DIR</span> <span class="n">examine</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">SOURCE_DIR</span> <span class="n">TARGET_DIR</span> <span class="p">[</span><span class="n">dedupe</span><span class="p">]</span> <span class="n">file</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">SOURCE_DIR</span> <span class="p">[</span><span class="n">dedupe</span><span class="p">]</span> <span class="n">flickr</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">SOURCE_DIR</span> <span class="n">TARGET_DIR</span> <span class="p">[</span><span class="n">dedupe</span><span class="p">]</span> <span class="n">file</span> <span class="n">flickr</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">SOURCE_DIR</span> <span class="n">TARGET_DIR</span> <span class="nb">all</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">conf</span><span class="o">=</span><span class="n">FILE</span>
+        <span class="n">photokeeper</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">h</span>
+
+<span class="n">Arguments</span><span class="p">:</span>
+        <span class="n">SOURCE_DIR</span>  <span class="n">Source</span> <span class="n">directory</span> <span class="n">of</span> <span class="n">photos</span>
+        <span class="n">TARGET_DIR</span>  <span class="n">Where</span> <span class="n">to</span> <span class="n">copy</span> <span class="n">the</span> <span class="n">image</span> <span class="n">files</span>
+        <span class="nb">all</span>         <span class="n">Run</span> <span class="nb">all</span> <span class="n">steps</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">flow</span> <span class="p">(</span><span class="n">examine</span><span class="p">,</span><span class="n">dedupe</span><span class="p">,</span><span class="n">flickr</span><span class="p">,</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">examine</span>    <span class="n">Examine</span> <span class="n">EXIF</span> <span class="n">tags</span>
+        <span class="n">dedupe</span>     <span class="n">Only</span> <span class="n">select</span> <span class="n">files</span> <span class="ow">not</span> <span class="n">already</span> <span class="n">present</span> <span class="ow">in</span> <span class="n">target</span> <span class="n">directory</span>
+        <span class="n">flickr</span>     <span class="n">Upload</span> <span class="n">to</span> <span class="n">flickr</span>
+        <span class="n">file</span>       <span class="n">Copy</span> <span class="n">files</span>
+
+<span class="n">Options</span><span class="p">:</span>
+        <span class="o">-</span><span class="n">h</span> <span class="o">--</span><span class="n">help</span>        <span class="n">show</span> <span class="n">this</span> <span class="n">message</span>
+        <span class="o">-</span><span class="n">v</span> <span class="o">--</span><span class="n">verbose</span>     <span class="n">show</span> <span class="n">more</span> <span class="n">information</span>
+        <span class="o">-</span><span class="n">d</span> <span class="o">--</span><span class="n">debug</span>       <span class="n">show</span> <span class="n">even</span> <span class="n">more</span> <span class="n">information</span>
+        <span class="o">--</span><span class="n">conf</span><span class="o">=</span><span class="n">FILE</span>      <span class="n">load</span> <span class="n">options</span> <span class="kn">from</span> <span class="nn">file</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>PhotoKeeper is currently only tested and provided for Python 3.5.  I have no
+plans to backport this to Python 2.x as I am shifting all my new development to
+3.x exclusively.</p>
 </div>
 <div class="section" id="disclaimer">
 <h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">¶</a></h2>
@@ -135,9 +228,9 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</p>
           <a href="contributing.html" title="Contributing"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Photo Keeper Documentation (version 0.1.0)"
+          <a href="index.html" title="Photo Keeper Documentation (version 0.1.2)"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Photo Keeper 0.1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Photo Keeper 0.1.2 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
