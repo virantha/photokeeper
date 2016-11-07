@@ -22,6 +22,10 @@ from xml.etree import ElementTree
 from tqdm import tqdm
 import itertools, dateparser, time
 
+from target import TargetBase
+
+
+
 
 class FileWithCallback(object):
     def __init__(self, filename):
@@ -82,7 +86,7 @@ class Photo(object):
         urllib.request.urlretrieve(self._construct_flickr_url(), tgt)
         return tgt
         
-class Flickr(object):
+class Flickr(TargetBase):
 
     def __init__(self):
         self.set_keys(*self.read_keys())
@@ -267,8 +271,8 @@ class Flickr(object):
                 self._add_photo_to_album(photoid, self.photosets[album_name].setid)
 
             tqdm.write("Adding {} to {} ".format(img.filename, album_name))
-            # Now, make sure we set the date-taken manually if it's a video
-            if img.is_video:
+            # Now, make sure we set the date-taken manually if no exif information
+            if img.exif_timestamp_missing:
                 dt = img.datetime_taken.strftime('%Y-%m-%d %H:%M:%S')
                 tqdm.write('Manually setting date on video {} to {}'.format(img.filename, dt))
                 self.flickr.photos.setDates(photo_id=photoid, date_taken=dt)

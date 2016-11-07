@@ -57,7 +57,7 @@ from utils import ordered_load, merge_args
     :private-members:
 """
 class ImageFile(object):
-    def __init__(self, srcdir, filename, tgtbasedir, tgtdatedir, datetime_taken, is_video=False):
+    def __init__(self, srcdir, filename, tgtbasedir, tgtdatedir, datetime_taken, exif_timestamp_missing=False):
         self.srcdir = srcdir
         self.filename = filename
         self.tgtbasedir = tgtbasedir
@@ -65,7 +65,7 @@ class ImageFile(object):
         self.datetime_taken = datetime_taken
         self.dup = False
         self.flickr_dup = False
-        self.is_video = is_video
+        self.exif_timestamp_missing = exif_timestamp_missing
         #print("adding {} with datetime {}".format(filename, datetime_taken.strftime('%Y-%m-%d %H:%M:%S')))
         pass
 
@@ -183,22 +183,22 @@ class PhotoKeeper(object):
                     filename = os.path.join(root, fn)
                     progress.update(1)
                     try:
-                        is_video = False
+                        exif_timestamp_missing = False
                         tags_dict = piexif.load(filename)
                         image_date = tags_dict['0th'][piexif.ImageIFD.DateTime]
                         # Why am I even using dateparser if it can't parse this??
                         image_datetime = dateparser.parse(image_date.decode('utf8'), date_formats=['%Y:%m:%d %H:%M:%S']) 
-                    except ValueError as e:
+                    except (KeyError, ValueError) as e:
 
                         logging.info('IGNORED: %s is not a JPG or TIFF' % (filename))
                         file_mod_time = os.path.getmtime(filename)
                         image_datetime = datetime.datetime.fromtimestamp(file_mod_time)
                         logging.info('Using %s ' % (image_datetime))
-                        is_video = True  # Need to mark this since we don't have EXIF and Flickr doesn't honor file date for date-taken
+                        exif_timestamp_missing = True  # Need to mark this since we don't have EXIF and Flickr doesn't honor file date for date-taken
                     
                     image_datetime_text = image_datetime.strftime(dt_format)
                     counts[image_datetime_text] += 1
-                    self.images.append(ImageFile(os.path.dirname(filename), os.path.basename(filename), self.tgt_dir, image_datetime_text, image_datetime, is_video))
+                    self.images.append(ImageFile(os.path.dirname(filename), os.path.basename(filename), self.tgt_dir, image_datetime_text, image_datetime, exif_timestamp_missing))
 
         counts = dict(counts)
         total = sum(counts.values())
