@@ -1,3 +1,7 @@
 pyyaml>=3.1.0
 docopt
 schema
+piexif
+dateparser
+tqdm
+flickrapi

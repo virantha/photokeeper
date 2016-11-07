@@ -1,6 +1,6 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: photokeeper
-Version: 0.1.0
+Version: 0.1.2
 Summary: Keep your photos in sync with Flickr
 Home-page: UNKNOWN
 Author: Virantha N. Ekanayake
@@ -50,3 +50,8 @@ Description: Photo Keeper -
         .. |Coverage Status| image:: https://coveralls.io/repos/virantha/photokeeper/badge.png?branch=develop
            :target: https://coveralls.io/r/virantha/photokeeper
 Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5

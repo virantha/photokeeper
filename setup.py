@@ -45,6 +45,13 @@ setup (
     long_description = long_description,
     author="Virantha N. Ekanayake",
     author_email="virantha@gmail.com", # Removed.
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        ],
     package_data = {'': ['*.xml']},
     zip_safe = True,
     include_package_data = True,

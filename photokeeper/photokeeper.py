@@ -45,11 +45,11 @@ from schema import Schema, And, Optional, Or, Use, SchemaError
 import piexif, dateparser
 
 from tqdm import tqdm
-from flickr import Flickr
-from filecopy import FileCopy
+from photokeeper.flickr import Flickr
+from photokeeper.filecopy import FileCopy
 
-from version import __version__
-from utils import ordered_load, merge_args
+from photokeeper.version import __version__
+from photokeeper.utils import ordered_load, merge_args
 
 """
    
@@ -133,7 +133,7 @@ class PhotoKeeper(object):
         else:
             conf_args = {}
         args = merge_args(conf_args, args)
-        print (args)
+        logging.debug (args)
         schema = Schema({
             'SOURCE_DIR': Or(os.path.isdir, error='Source directory does not exist'),
             'TARGET_DIR': Or(lambda x: x is None, os.path.isdir, error='Destination directory does not exist'),
@@ -144,7 +144,7 @@ class PhotoKeeper(object):
         except SchemaError as e:
             exit(e)
 
-        print (args)
+        logging.debug (args)
         if args['all'] == 0:
             for f in list(self.flow):
                 if args[f] == 0: del self.flow[f]

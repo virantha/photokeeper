@@ -9,7 +9,11 @@ TODO.rst
 requirements.txt
 setup.py
 photokeeper/__init__.py
+photokeeper/blah.py
+photokeeper/filecopy.py
+photokeeper/flickr.py
 photokeeper/photokeeper.py
+photokeeper/target.py
 photokeeper/utils.py
 photokeeper/version.py
 photokeeper.egg-info/PKG-INFO

@@ -15,7 +15,7 @@
 import itertools
 import os, shutil, logging
 
-from target import TargetBase
+from photokeeper.target import TargetBase
 
 class FileCopy(TargetBase):
 

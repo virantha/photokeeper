@@ -22,7 +22,7 @@ from xml.etree import ElementTree
 from tqdm import tqdm
 import itertools, dateparser, time
 
-from target import TargetBase
+from photokeeper.target import TargetBase
 
 
 

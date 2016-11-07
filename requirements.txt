@@ -3,4 +3,6 @@ docopt
 schema
 piexif
 dateparser
-progressbar2
+tqdm
+flickrapi
+
